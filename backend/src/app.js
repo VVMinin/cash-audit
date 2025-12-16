@@ -10,7 +10,15 @@ const userPasswordRoutes = require('./routes/user.password.routes');
 
 const app = express();
 
-app.use(cors());
+app.use(
+  cors({
+    origin: ['http://94.241.140.88', 'http://localhost:5173'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true,
+  })
+);
+app.options('*', cors());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
