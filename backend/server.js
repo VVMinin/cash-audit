@@ -9,7 +9,8 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+// Более точная настройка CORS
+app.use(cors({ origin: 'http://94.241.140.88' }));
 app.use(express.json());
 
 app.get('/health', (req, res) => {
@@ -36,6 +37,3 @@ connectDB()
     console.error('Failed to start server:', err.message);
     process.exit(1);
   });
-
-
-
