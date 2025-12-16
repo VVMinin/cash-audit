@@ -1,0 +1,38 @@
+.accounts-summary {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px;
+  min-width: 240px;
+}
+
+.accounts-summary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 8px 0;
+}
+
+.accounts-summary-item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.accounts-summary-name {
+  font-weight: 600;
+}
+
+.accounts-summary-balance {
+  font-weight: 700;
+}
+
+.accounts-summary-total {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  font-weight: 700;
+}
+
+

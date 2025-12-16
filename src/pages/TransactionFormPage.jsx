@@ -1,0 +1,142 @@
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import { useNavigate, useParams } from 'react-router-dom'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Button from '../components/ui/Button'
+import Loader from '../components/Loader'
+import {
+  createTransaction,
+  fetchTransaction,
+  updateTransaction,
+  clearCurrent,
+} from '../features/transactions/transactionsSlice'
+import { fetchAccounts } from '../features/accounts/accountsSlice'
+import { fetchCategories } from '../features/categories/categoriesSlice'
+
+const today = () => new Date().toISOString().split('T')[0]
+
+const initialForm = {
+  account: '',
+  category: '',
+  amount: '',
+  comment: '',
+  date: today(),
+}
+
+const TransactionFormPage = () => {
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  const { id } = useParams()
+
+  const { current, status, error } = useSelector((s) => s.transactions)
+  const { items: accounts } = useSelector((s) => s.accounts)
+  const { items: categories } = useSelector((s) => s.categories)
+
+  const [form, setForm] = useState(initialForm)
+
+  const isEdit = Boolean(id)
+  const loading = status === 'loading'
+
+  useEffect(() => {
+    dispatch(fetchAccounts())
+    dispatch(fetchCategories())
+    if (isEdit) {
+      dispatch(fetchTransaction(id))
+    } else {
+      dispatch(clearCurrent())
+    }
+    return () => dispatch(clearCurrent())
+  }, [dispatch, id, isEdit])
+
+  useEffect(() => {
+    if (current && isEdit) {
+      setForm({
+        account: current.account?._id || '',
+        category: current.category?._id || '',
+        amount: current.amount,
+        comment: current.comment || '',
+        date: current.date ? current.date.slice(0, 10) : '',
+      })
+    } else if (!isEdit) {
+      setForm((f) => ({ ...f, date: today() }))
+    }
+  }, [current, isEdit])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!form.account || !form.category || !form.amount || !form.date) return
+    if (isEdit) {
+      dispatch(updateTransaction({ id, ...form })).then((res) => {
+        if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
+        if (res.meta.requestStatus === 'fulfilled') dispatch(fetchAccounts())
+      })
+    } else {
+      dispatch(createTransaction(form)).then((res) => {
+        if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
+        if (res.meta.requestStatus === 'fulfilled') dispatch(fetchAccounts())
+      })
+    }
+  }
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <h2>{isEdit ? 'Редактирование операции' : 'Новая операция'}</h2>
+          <p className="muted">Доход или расход с выбором счета и категории</p>
+        </div>
+      </header>
+
+      <div className="card">
+        <form className="grid" onSubmit={handleSubmit}>
+          <Select
+            label="Счет"
+            value={form.account}
+            onChange={(e) => setForm((f) => ({ ...f, account: e.target.value }))}
+            options={[
+              { value: '', label: 'Выберите счет', disabled: true },
+              ...accounts.map((a) => ({ value: a._id, label: a.name })),
+            ]}
+          />
+          <Select
+            label="Категория"
+            value={form.category}
+            onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+            options={[
+              { value: '', label: 'Выберите категорию', disabled: true },
+              ...categories.map((c) => ({ value: c._id, label: `${c.name} (${c.type})` })),
+            ]}
+          />
+          <Input
+            label="Сумма"
+            type="number"
+            value={form.amount}
+            onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))}
+            placeholder="0"
+          />
+          <Input
+            label="Дата"
+            type="date"
+            value={form.date}
+            onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
+          />
+          <Input
+            label="Комментарий (опционально)"
+            value={form.comment}
+            onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+            required={false}
+          />
+          <Button type="submit" disabled={loading}>
+            {isEdit ? 'Сохранить' : 'Создать'}
+          </Button>
+        </form>
+        {loading && <Loader />}
+        {error && <p className="error-text">{error}</p>}
+      </div>
+    </div>
+  )
+}
+
+export default TransactionFormPage
+

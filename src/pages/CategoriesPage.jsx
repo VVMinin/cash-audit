@@ -1,0 +1,115 @@
+import { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Button from '../components/ui/Button'
+import Loader from '../components/Loader'
+import {
+  createCategory,
+  deleteCategory,
+  fetchCategories,
+  updateCategory,
+} from '../features/categories/categoriesSlice'
+
+const initialForm = { name: '', type: '', comment: '' }
+
+const CategoriesPage = () => {
+  const dispatch = useDispatch()
+  const { items, status, error } = useSelector((state) => state.categories)
+  const [form, setForm] = useState(initialForm)
+  const [editingId, setEditingId] = useState(null)
+
+  useEffect(() => {
+    dispatch(fetchCategories())
+  }, [dispatch])
+
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    if (!form.name || !form.type) {
+      alert('Выберите тип категории')
+      return
+    }
+    if (editingId) {
+      dispatch(updateCategory({ id: editingId, ...form }))
+    } else {
+      dispatch(createCategory(form))
+    }
+    setForm(initialForm)
+    setEditingId(null)
+  }
+
+  const handleEdit = (cat) => {
+    setEditingId(cat._id)
+    setForm({ name: cat.name, type: cat.type, comment: cat.comment || '' })
+  }
+
+  const loading = status === 'loading'
+
+  const typeOptions = [
+    { value: '', label: 'Выберите тип', disabled: true },
+    { value: 'income', label: 'Доход' },
+    { value: 'expense', label: 'Расход' },
+  ]
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <h2>Категории</h2>
+          <p className="muted">Доходы и расходы</p>
+        </div>
+      </header>
+
+      <div className="card">
+        <form className="grid" onSubmit={handleSubmit}>
+          <Input
+            label="Наименование"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="Напр. Зарплата"
+          />
+          <Select
+            label="Тип"
+            value={form.type}
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+            options={typeOptions}
+          />
+          <Input
+            label="Комментарий"
+            value={form.comment}
+            onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+            required={false}
+            placeholder="Опционально"
+          />
+          <Button type="submit" disabled={loading}>
+            {editingId ? 'Сохранить' : 'Добавить'}
+          </Button>
+        </form>
+        {loading && <Loader />}
+        {error && <p className="error-text">{error}</p>}
+      </div>
+
+      <div className="card list">
+        {items.length === 0 && <p className="muted">Пока нет категорий</p>}
+        {items.map((cat) => (
+          <div key={cat._id} className="list-row">
+            <div>
+              <div className="list-title">{cat.name}</div>
+              <div className="muted small">Тип: {cat.type}</div>
+              {cat.comment && <div className="small">{cat.comment}</div>}
+            </div>
+            <div className="list-actions">
+              <Button onClick={() => handleEdit(cat)}>Редактировать</Button>
+              <Button onClick={() => dispatch(deleteCategory(cat._id))} disabled={loading}>
+                Удалить
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default CategoriesPage
+

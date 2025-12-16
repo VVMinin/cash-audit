@@ -1,0 +1,147 @@
+import { useEffect, useMemo, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
+import Button from '../components/ui/Button'
+import Loader from '../components/Loader'
+import {
+  createAccount,
+  deleteAccount,
+  fetchAccounts,
+  updateAccount,
+} from '../features/accounts/accountsSlice'
+
+const initialForm = { name: '', type: '', balance: 0, comment: '' }
+
+const AccountsPage = () => {
+  const dispatch = useDispatch()
+  const { items, status, error } = useSelector((state) => state.accounts)
+  const [form, setForm] = useState(initialForm)
+  const [editingId, setEditingId] = useState(null)
+
+  useEffect(() => {
+    dispatch(fetchAccounts())
+  }, [dispatch])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    if (!form.name || !form.type) {
+      alert('Выберите тип счета')
+      return
+    }
+    if (Number(form.balance) < 0) {
+      alert('Баланс не может быть отрицательным')
+      return
+    }
+
+    const payload = { ...form, balance: Number(form.balance) }
+    const action = editingId
+      ? await dispatch(updateAccount({ id: editingId, ...payload }))
+      : await dispatch(createAccount(payload))
+
+    if (action.meta.requestStatus === 'fulfilled') {
+      dispatch(fetchAccounts())
+      setForm(initialForm)
+      setEditingId(null)
+    }
+  }
+
+  const handleEdit = (acc) => {
+    setEditingId(acc._id)
+    setForm({
+      name: acc.name,
+      type: acc.type,
+      balance: acc.balance,
+      comment: acc.comment || '',
+    })
+  }
+
+  const loading = status === 'loading'
+
+  const totalBalance = useMemo(
+    () => items.reduce((sum, acc) => sum + (acc.balance || 0), 0),
+    [items]
+  )
+
+  const accountTypeOptions = useMemo(
+    () => [
+      { value: '', label: 'Выберите тип', disabled: true },
+      { value: 'debit', label: 'Debit / Card' },
+      { value: 'cash', label: 'Cash' },
+      { value: 'deposit', label: 'Deposit' },
+      { value: 'other', label: 'Other' },
+    ],
+    []
+  )
+
+  return (
+    <div className="page">
+      <header className="page-header">
+        <div>
+          <h2>Счета</h2>
+          <p className="muted">Добавление, редактирование, удаление счетов</p>
+        </div>
+      </header>
+
+      <div className="card">
+        <form className="grid" onSubmit={handleSubmit}>
+          <Input
+            label="Наименование"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+            placeholder="Напр. Основная карта"
+          />
+          <Select
+            label="Тип"
+            value={form.type}
+            onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
+            options={accountTypeOptions}
+          />
+          <Input
+            label="Начальный баланс"
+            type="number"
+            value={form.balance}
+            onChange={(e) => setForm((f) => ({ ...f, balance: Number(e.target.value) }))}
+            placeholder="0"
+          />
+          <Input
+            label="Комментарий"
+            value={form.comment}
+            onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
+            required={false}
+            placeholder="Опционально"
+          />
+          <Button type="submit" disabled={loading}>
+            {editingId ? 'Сохранить' : 'Добавить'}
+          </Button>
+        </form>
+        {loading && <Loader />}
+        {error && <p className="error-text">{error}</p>}
+        <p className="muted">Итого по всем счетам: {totalBalance}</p>
+      </div>
+
+      <div className="card list">
+        {items.length === 0 && <p className="muted">Пока нет счетов</p>}
+        {items.map((acc) => (
+          <div key={acc._id} className="list-row">
+            <div>
+              <div className="list-title">{acc.name}</div>
+              <div className="muted small">Тип: {acc.type}</div>
+              <div className="small">Баланс: {acc.balance}</div>
+              {acc.comment && <div className="small">{acc.comment}</div>}
+            </div>
+            <div className="list-actions">
+              <Button onClick={() => handleEdit(acc)}>Редактировать</Button>
+              <Button onClick={() => dispatch(deleteAccount(acc._id))} disabled={loading}>
+                Удалить
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+export default AccountsPage
+
