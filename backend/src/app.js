@@ -1,5 +1,4 @@
 const express = require('express');
-const cors = require('cors');
 const authRoutes = require('./routes/auth.routes');
 const accountRoutes = require('./routes/account.routes');
 const categoryRoutes = require('./routes/category.routes');
@@ -19,13 +18,6 @@ app.use((req, res, next) => {
   }
   next();
 });
-
-app.use(
-  cors({
-    origin: 'http://94.241.140.88',
-    credentials: true,
-  })
-);
 app.use(express.json());
 
 app.get('/health', (req, res) => {
