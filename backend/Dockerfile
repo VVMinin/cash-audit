@@ -11,6 +11,4 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 EXPOSE 5000
-CMD ["npm", "start"]
-
-
+CMD ["node", "server.js"]
