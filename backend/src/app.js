@@ -10,15 +10,22 @@ const userPasswordRoutes = require('./routes/user.password.routes');
 
 const app = express();
 
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'http://94.241.140.88');
+  res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    return res.sendStatus(204);
+  }
+  next();
+});
+
 app.use(
   cors({
-    origin: ['http://94.241.140.88', 'http://localhost:5173'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    origin: 'http://94.241.140.88',
     credentials: true,
   })
 );
-app.options('*', cors());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
