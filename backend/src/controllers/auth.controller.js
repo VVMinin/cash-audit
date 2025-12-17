@@ -25,7 +25,7 @@ exports.register = async (req, res, next) => {
 
     const hashed = await bcrypt.hash(password, 10);
     const user = await User.create({ name, email, password: hashed });
-    const token = generateToken(user._id.toString(), user.role || 'user');
+    const token = generateToken(user._id.toString(), user.role);
 
     return res.status(201).json({ user: toPublicUser(user), token });
   } catch (err) {
@@ -51,12 +51,7 @@ exports.login = async (req, res, next) => {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
 
-    if (!user.role) {
-      user.role = 'user';
-      await user.save();
-    }
-
-    const token = generateToken(user._id.toString(), user.role || 'user');
+    const token = generateToken(user._id.toString(), user.role);
     return res.json({ user: toPublicUser(user), token });
   } catch (err) {
     return next(err);
@@ -68,10 +63,6 @@ exports.me = async (req, res, next) => {
     const user = await User.findById(req.user.id);
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
-    }
-    if (!user.role) {
-      user.role = 'user';
-      await user.save();
     }
     return res.json({ user: toPublicUser(user) });
   } catch (err) {

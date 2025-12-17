@@ -106,43 +106,16 @@ const transactionsSlice = createSlice({
       .addCase(fetchTransaction.fulfilled, (state, action) => {
         state.current = action.payload
       })
-      .addCase(createTransaction.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
-      })
       .addCase(createTransaction.fulfilled, (state, action) => {
-        state.status = 'succeeded'
         state.items.unshift(action.payload)
       })
-      .addCase(createTransaction.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
-      })
-      .addCase(updateTransaction.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
-      })
       .addCase(updateTransaction.fulfilled, (state, action) => {
-        state.status = 'succeeded'
         state.items = state.items.map((tx) => (tx._id === action.payload._id ? action.payload : tx))
         state.current = action.payload
       })
-      .addCase(updateTransaction.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
-      })
-      .addCase(deleteTransaction.pending, (state) => {
-        state.status = 'loading'
-        state.error = null
-      })
       .addCase(deleteTransaction.fulfilled, (state, action) => {
-        state.status = 'succeeded'
         state.items = state.items.filter((tx) => tx._id !== action.payload)
         state.total = Math.max(0, state.total - 1)
-      })
-      .addCase(deleteTransaction.rejected, (state, action) => {
-        state.status = 'failed'
-        state.error = action.payload
       })
   },
 })

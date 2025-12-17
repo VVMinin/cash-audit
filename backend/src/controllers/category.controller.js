@@ -12,18 +12,15 @@ exports.list = async (req, res, next) => {
 exports.create = async (req, res, next) => {
   try {
     const { name, type, comment } = req.body
-    const normalizedType = (type || '').toLowerCase().trim()
-    const normalizedName = (name || '').trim()
-    if (!normalizedName || !normalizedType) {
+    if (!name || !type) {
       return res.status(400).json({ error: 'Name and type are required' })
     }
-    // Проверка допустимого типа категории
-    if (!['income', 'expense'].includes(normalizedType)) {
+    if (!['income', 'expense'].includes(type)) {
       return res.status(400).json({ error: 'Type must be income or expense' })
     }
     const category = await Category.create({
-      name: normalizedName,
-      type: normalizedType,
+      name,
+      type,
       comment: comment || '',
       user: req.user.id,
     })
@@ -41,13 +38,12 @@ exports.update = async (req, res, next) => {
     if (!category) {
       return res.status(404).json({ error: 'Category not found' })
     }
-    if (name) category.name = name.trim()
+    if (name) category.name = name
     if (type) {
-      const normalizedType = (type || '').toLowerCase().trim()
-      if (!['income', 'expense'].includes(normalizedType)) {
+      if (!['income', 'expense'].includes(type)) {
         return res.status(400).json({ error: 'Type must be income or expense' })
       }
-      category.type = normalizedType
+      category.type = type
     }
     if (comment !== undefined) category.comment = comment
     await category.save()

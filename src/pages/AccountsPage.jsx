@@ -23,27 +23,21 @@ const AccountsPage = () => {
     dispatch(fetchAccounts())
   }, [dispatch])
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault()
-    if (!form.name || !form.type) {
-      alert('Выберите тип счета')
-      return
-    }
+    if (!form.name || !form.type) return
+    // Баланс счета не может быть отрицательным
     if (Number(form.balance) < 0) {
       alert('Баланс не может быть отрицательным')
       return
     }
-
-    const payload = { ...form, balance: Number(form.balance) }
-    const action = editingId
-      ? await dispatch(updateAccount({ id: editingId, ...payload }))
-      : await dispatch(createAccount(payload))
-
-    if (action.meta.requestStatus === 'fulfilled') {
-      dispatch(fetchAccounts())
-      setForm(initialForm)
-      setEditingId(null)
+    if (editingId) {
+      dispatch(updateAccount({ id: editingId, ...form, balance: Number(form.balance) }))
+    } else {
+      dispatch(createAccount({ ...form, balance: Number(form.balance) }))
     }
+    setForm(initialForm)
+    setEditingId(null)
   }
 
   const handleEdit = (acc) => {
@@ -65,7 +59,6 @@ const AccountsPage = () => {
 
   const accountTypeOptions = useMemo(
     () => [
-      { value: '', label: 'Выберите тип', disabled: true },
       { value: 'debit', label: 'Debit / Card' },
       { value: 'cash', label: 'Cash' },
       { value: 'deposit', label: 'Deposit' },
@@ -78,7 +71,7 @@ const AccountsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Счета</h2>
+          <h2>Accounts</h2>
           <p className="muted">Добавление, редактирование, удаление счетов</p>
         </div>
       </header>
@@ -86,13 +79,13 @@ const AccountsPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Наименование"
+            label="Name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Напр. Основная карта"
           />
           <Select
-            label="Тип"
+            label="Type"
             value={form.type}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
             options={accountTypeOptions}
@@ -112,7 +105,7 @@ const AccountsPage = () => {
             placeholder="Опционально"
           />
           <Button type="submit" disabled={loading}>
-            {editingId ? 'Сохранить' : 'Добавить'}
+            {editingId ? 'Save' : 'Add'}
           </Button>
         </form>
         {loading && <Loader />}
@@ -126,14 +119,14 @@ const AccountsPage = () => {
           <div key={acc._id} className="list-row">
             <div>
               <div className="list-title">{acc.name}</div>
-              <div className="muted small">Тип: {acc.type}</div>
-              <div className="small">Баланс: {acc.balance}</div>
+              <div className="muted small">Type: {acc.type}</div>
+              <div className="small">Balance: {acc.balance}</div>
               {acc.comment && <div className="small">{acc.comment}</div>}
             </div>
             <div className="list-actions">
-              <Button onClick={() => handleEdit(acc)}>Редактировать</Button>
+              <Button onClick={() => handleEdit(acc)}>Edit</Button>
               <Button onClick={() => dispatch(deleteAccount(acc._id))} disabled={loading}>
-                Удалить
+                Delete
               </Button>
             </div>
           </div>

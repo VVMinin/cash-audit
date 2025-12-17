@@ -14,14 +14,12 @@ import {
 import { fetchAccounts } from '../features/accounts/accountsSlice'
 import { fetchCategories } from '../features/categories/categoriesSlice'
 
-const today = () => new Date().toISOString().split('T')[0]
-
 const initialForm = {
   account: '',
   category: '',
   amount: '',
   comment: '',
-  date: today(),
+  date: '',
 }
 
 const TransactionFormPage = () => {
@@ -58,8 +56,6 @@ const TransactionFormPage = () => {
         comment: current.comment || '',
         date: current.date ? current.date.slice(0, 10) : '',
       })
-    } else if (!isEdit) {
-      setForm((f) => ({ ...f, date: today() }))
     }
   }, [current, isEdit])
 
@@ -69,12 +65,10 @@ const TransactionFormPage = () => {
     if (isEdit) {
       dispatch(updateTransaction({ id, ...form })).then((res) => {
         if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
-        if (res.meta.requestStatus === 'fulfilled') dispatch(fetchAccounts())
       })
     } else {
       dispatch(createTransaction(form)).then((res) => {
         if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
-        if (res.meta.requestStatus === 'fulfilled') dispatch(fetchAccounts())
       })
     }
   }
@@ -83,7 +77,7 @@ const TransactionFormPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>{isEdit ? 'Редактирование операции' : 'Новая операция'}</h2>
+          <h2>{isEdit ? 'Edit transaction' : 'New transaction'}</h2>
           <p className="muted">Доход или расход с выбором счета и категории</p>
         </div>
       </header>
@@ -91,44 +85,44 @@ const TransactionFormPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Select
-            label="Счет"
+            label="Account"
             value={form.account}
             onChange={(e) => setForm((f) => ({ ...f, account: e.target.value }))}
             options={[
-              { value: '', label: 'Выберите счет', disabled: true },
+              { value: '', label: 'Select account', disabled: true },
               ...accounts.map((a) => ({ value: a._id, label: a.name })),
             ]}
           />
           <Select
-            label="Категория"
+            label="Category"
             value={form.category}
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
             options={[
-              { value: '', label: 'Выберите категорию', disabled: true },
+              { value: '', label: 'Select category', disabled: true },
               ...categories.map((c) => ({ value: c._id, label: `${c.name} (${c.type})` })),
             ]}
           />
           <Input
-            label="Сумма"
+            label="Amount"
             type="number"
             value={form.amount}
             onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))}
             placeholder="0"
           />
           <Input
-            label="Дата"
+            label="Date"
             type="date"
             value={form.date}
             onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
           />
           <Input
-            label="Комментарий (опционально)"
+            label="Comment (optional)"
             value={form.comment}
             onChange={(e) => setForm((f) => ({ ...f, comment: e.target.value }))}
             required={false}
           />
           <Button type="submit" disabled={loading}>
-            {isEdit ? 'Сохранить' : 'Создать'}
+            {isEdit ? 'Save' : 'Create'}
           </Button>
         </form>
         {loading && <Loader />}

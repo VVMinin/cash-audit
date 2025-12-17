@@ -31,30 +31,30 @@ const LoginPage = () => {
   return (
     <AuthLayout>
       <div className="auth-card">
-      <h2>Вход</h2>
+      <h2>Login</h2>
       <form onSubmit={handleSubmit}>
         <Input
-          label="Электронная почта"
+          label="Email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
         />
         <Input
-          label="Пароль"
+          label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
         />
         <Button type="submit" disabled={loading}>
-          {loading ? 'Входим...' : 'Войти'}
+          {loading ? 'Logging in...' : 'Login'}
         </Button>
       </form>
       {loading && <Loader />}
       {error && <p className="error-text">{error}</p>}
       <p className="muted">
-        Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
+        No account? <Link to="/register">Register</Link>
       </p>
       </div>
     </AuthLayout>

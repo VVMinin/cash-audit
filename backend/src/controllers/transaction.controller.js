@@ -1,7 +1,6 @@
 const Transaction = require('../models/Transaction')
 const Account = require('../models/Account')
 const Category = require('../models/Category')
-const { Types } = require('mongoose')
 
 const parsePagination = (req) => {
   const page = Math.max(1, Number(req.query.page) || 1)
@@ -10,9 +9,8 @@ const parsePagination = (req) => {
 }
 
 const aggregateSummary = async (userId) => {
-  const userObjectId = typeof userId === 'string' ? new Types.ObjectId(userId) : userId
   const totalsAgg = await Transaction.aggregate([
-    { $match: { user: userObjectId } },
+    { $match: { user: userId } },
     {
       $group: {
         _id: '$type',
@@ -25,7 +23,7 @@ const aggregateSummary = async (userId) => {
   const expenseTotal = totalsAgg.find((t) => t._id === 'expense')?.total || 0
 
   const byCategory = await Transaction.aggregate([
-    { $match: { user: userObjectId } },
+    { $match: { user: userId } },
     {
       $group: {
         _id: '$category',
@@ -116,28 +114,23 @@ exports.create = async (req, res, next) => {
       return res.status(400).json({ error: 'Category not found' })
     }
 
-    const amt = Number(amount)
-
-    const balanceBefore = accountDoc.balance
-    let balanceAfter = balanceBefore
+    // Пересчет баланса счета при добавлении операции
     if (categoryDoc.type === 'expense') {
-      balanceAfter = balanceBefore - amt
-      if (balanceAfter < 0) {
+      const nextBalance = accountDoc.balance - Number(amount)
+      if (nextBalance < 0) {
         return res.status(400).json({ error: 'Insufficient funds on account' })
       }
+      accountDoc.balance = nextBalance
     } else {
-      balanceAfter = balanceBefore + amt
+      accountDoc.balance += Number(amount)
     }
-    accountDoc.balance = balanceAfter
     await accountDoc.save()
 
     const tx = await Transaction.create({
       user: req.user.id,
       account,
       category,
-      amount: amt,
-      balanceBefore,
-      balanceAfter,
+      amount: Number(amount),
       comment: comment || '',
       type: categoryDoc.type,
       date: new Date(date),
@@ -164,9 +157,18 @@ exports.update = async (req, res, next) => {
       return res.status(400).json({ error: 'Amount must be greater than 0' })
     }
 
+    // rollback старой операции
     const oldAccount = await Account.findOne({ _id: tx.account, user: req.user.id })
     if (!oldAccount) return res.status(400).json({ error: 'Account not found' })
-    oldAccount.balance = tx.balanceBefore
+    if (tx.type === 'expense') {
+      oldAccount.balance += tx.amount
+    } else {
+      const nextBalance = oldAccount.balance - tx.amount
+      if (nextBalance < 0) {
+        return res.status(400).json({ error: 'Account balance would be negative' })
+      }
+      oldAccount.balance = nextBalance
+    }
     await oldAccount.save()
 
     const newAccountId = account || tx.account
@@ -180,25 +182,22 @@ exports.update = async (req, res, next) => {
     const newAmount = amount !== undefined ? Number(amount) : tx.amount
     const newType = categoryDoc.type
 
-    const balanceBefore = newAccount.balance
-    let balanceAfter = balanceBefore
+    // применяем новую операцию
     if (newType === 'expense') {
-      balanceAfter = balanceBefore - newAmount
-      if (balanceAfter < 0) {
+      const nextBalance = newAccount.balance - newAmount
+      if (nextBalance < 0) {
         return res.status(400).json({ error: 'Insufficient funds on account' })
       }
+      newAccount.balance = nextBalance
     } else {
-      balanceAfter = balanceBefore + newAmount
+      newAccount.balance += newAmount
     }
-    newAccount.balance = balanceAfter
     await newAccount.save()
 
     tx.account = newAccountId
     tx.category = categoryId
     tx.amount = newAmount
     tx.type = newType
-    tx.balanceBefore = balanceBefore
-    tx.balanceAfter = balanceAfter
     if (comment !== undefined) tx.comment = comment
     if (date) tx.date = new Date(date)
 
@@ -223,7 +222,16 @@ exports.remove = async (req, res, next) => {
     const account = await Account.findOne({ _id: tx.account, user: req.user.id })
     if (!account) return res.status(400).json({ error: 'Account not found' })
 
-    account.balance = tx.balanceBefore
+    // откат баланса при удалении
+    if (tx.type === 'expense') {
+      account.balance += tx.amount
+    } else {
+      const nextBalance = account.balance - tx.amount
+      if (nextBalance < 0) {
+        return res.status(400).json({ error: 'Account balance would be negative' })
+      }
+      account.balance = nextBalance
+    }
     await account.save()
     await tx.deleteOne()
     res.json({ success: true })

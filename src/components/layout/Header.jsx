@@ -19,6 +19,7 @@ const Header = () => {
     { to: '/categories', label: 'Категории' },
     { to: '/transactions', label: 'Операции' },
     { to: '/settings', label: 'Настройки' },
+    // Доступ только для администратора
     ...(user?.role === 'admin' ? [{ to: '/admin/users', label: 'Пользователи' }] : []),
   ]
 

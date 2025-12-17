@@ -24,12 +24,7 @@ export const createCategory = createAsyncThunk(
   'categories/create',
   async ({ name, type, comment }, { rejectWithValue }) => {
     try {
-      const res = await api.post('/categories', {
-        name,
-        // Значения type должны совпадать с enum в backend
-        type: (type || '').toLowerCase(),
-        comment,
-      })
+      const res = await api.post('/categories', { name, type, comment })
       return res.data.category
     } catch (err) {
       const message = err.response?.data?.error || 'Failed to create category'
@@ -42,12 +37,7 @@ export const updateCategory = createAsyncThunk(
   'categories/update',
   async ({ id, name, type, comment }, { rejectWithValue }) => {
     try {
-      const res = await api.put(`/categories/${id}`, {
-        name,
-        // Значения type должны совпадать с enum в backend
-        type: (type || '').toLowerCase(),
-        comment,
-      })
+      const res = await api.put(`/categories/${id}`, { name, type, comment })
       return res.data.category
     } catch (err) {
       const message = err.response?.data?.error || 'Failed to update category'

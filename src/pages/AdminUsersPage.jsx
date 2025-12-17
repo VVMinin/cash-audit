@@ -1,15 +1,20 @@
 import { useEffect, useState } from 'react'
 import { useSelector } from 'react-redux'
 import api from '../services/api'
+import Input from '../components/ui/Input'
+import Select from '../components/ui/Select'
 import Button from '../components/ui/Button'
 import Loader from '../components/Loader'
 import './AdminUsersPage.css'
+
+const emptyUser = { name: '', email: '', role: 'user', password: '' }
 
 const AdminUsersPage = () => {
   const { user } = useSelector((s) => s.auth)
   const [users, setUsers] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const [form, setForm] = useState(emptyUser)
   const [editId, setEditId] = useState(null)
   const [passwordForm, setPasswordForm] = useState({ id: '', password: '' })
 
@@ -33,9 +38,34 @@ const AdminUsersPage = () => {
     if (isAdmin) loadUsers()
   }, [isAdmin])
 
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    try {
+      setLoading(true)
+      if (editId) {
+        const res = await api.put(`/admin/users/${editId}`, {
+          name: form.name,
+          email: form.email,
+          role: form.role,
+        })
+        setUsers((u) => u.map((item) => (item.id === editId ? res.data.user : item)))
+      } else {
+        const res = await api.post('/admin/users', form)
+        setUsers((u) => [res.data.user, ...u])
+      }
+      setForm(emptyUser)
+      setEditId(null)
+      setError(null)
+    } catch (err) {
+      setError(err.response?.data?.error || 'Save failed')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   const handleEdit = (u) => {
     setEditId(u.id)
-    setPasswordForm({ id: '', password: '' })
+    setForm({ name: u.name, email: u.email, role: u.role, password: '' })
   }
 
   const handleDelete = async (id) => {
@@ -76,10 +106,49 @@ const AdminUsersPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Пользователи (Админ)</h2>
-          <p className="muted">Редактирование, смена роли/пароля, удаление</p>
+          <h2>Пользователи (Admin)</h2>
+          <p className="muted">Создание, редактирование, удаление и смена пароля</p>
         </div>
       </header>
+
+      <div className="card">
+        <h4>{editId ? 'Редактировать' : 'Добавить'} пользователя</h4>
+        <form className="grid" onSubmit={handleSubmit}>
+          <Input
+            label="Имя"
+            value={form.name}
+            onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+          />
+          <Input
+            label="Email"
+            type="email"
+            value={form.email}
+            onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
+          />
+          {!editId && (
+            <Input
+              label="Пароль"
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+            />
+          )}
+          <Select
+            label="Роль"
+            value={form.role}
+            onChange={(e) => setForm((f) => ({ ...f, role: e.target.value }))}
+            options={[
+              { value: 'user', label: 'User' },
+              { value: 'admin', label: 'Admin' },
+            ]}
+          />
+          <Button type="submit" disabled={loading}>
+            {editId ? 'Сохранить' : 'Создать'}
+          </Button>
+        </form>
+        {loading && <Loader />}
+        {error && <p className="error-text">{error}</p>}
+      </div>
 
       <div className="card list">
         <h4>Список пользователей</h4>
@@ -89,7 +158,7 @@ const AdminUsersPage = () => {
             <div>
               <div className="list-title">{u.name}</div>
               <div className="muted small">{u.email}</div>
-              <div className="small">Роль: {u.role}</div>
+              <div className="small">role: {u.role}</div>
             </div>
             <div className="list-actions">
               <Button onClick={() => handleEdit(u)}>Редактировать</Button>

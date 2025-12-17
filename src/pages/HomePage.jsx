@@ -25,15 +25,16 @@ const HomePage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Добро пожаловать{user?.name ? `, ${user.name}` : ''}</h2>
-          <p className="muted">Главная (доступна только авторизованным)</p>
+          <h2>Welcome{user?.name ? `, ${user.name}` : ''}</h2>
+          <p className="muted">Главная заглушка (доступна только авторизованным)</p>
         </div>
-        <Button onClick={() => dispatch(logout())}>Выйти</Button>
+        <Button onClick={() => dispatch(logout())}>Logout</Button>
       </header>
       <div className="card">
-        <p>Аналитика и ссылки на разделы.</p>
+        <p>Здесь аналитика и ссылки на разделы.</p>
         <div className="links">
-          <Link to="/accounts">Счета</Link> · <Link to="/categories">Категории</Link> ·{' '}
+          <Link to="/accounts">Перейти к счетам</Link> ·{' '}
+          <Link to="/categories">Категории</Link> ·{' '}
           <Link to="/transactions">Операции</Link>
         </div>
         <div className="summary-grid">
@@ -42,10 +43,8 @@ const HomePage = () => {
         </div>
         {loading && <Loader />}
         {error && <p className="error-text">{error}</p>}
-        <div className="analytics-chart-wrapper">
-          <div className="analytics-chart">
-            <FinanceChart income={income} expense={expense} />
-          </div>
+        <div style={{ maxWidth: 420, marginTop: 16 }}>
+          <FinanceChart income={income} expense={expense} />
         </div>
       </div>
     </div>

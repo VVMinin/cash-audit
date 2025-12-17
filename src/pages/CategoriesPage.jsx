@@ -25,10 +25,7 @@ const CategoriesPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (!form.name || !form.type) {
-      alert('Выберите тип категории')
-      return
-    }
+    if (!form.name || !form.type) return
     if (editingId) {
       dispatch(updateCategory({ id: editingId, ...form }))
     } else {
@@ -46,16 +43,15 @@ const CategoriesPage = () => {
   const loading = status === 'loading'
 
   const typeOptions = [
-    { value: '', label: 'Выберите тип', disabled: true },
-    { value: 'income', label: 'Доход' },
-    { value: 'expense', label: 'Расход' },
+    { value: 'income', label: 'Income' },
+    { value: 'expense', label: 'Expense' },
   ]
 
   return (
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Категории</h2>
+          <h2>Categories</h2>
           <p className="muted">Доходы и расходы</p>
         </div>
       </header>
@@ -63,13 +59,13 @@ const CategoriesPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Наименование"
+            label="Name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Напр. Зарплата"
           />
           <Select
-            label="Тип"
+            label="Type"
             value={form.type}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
             options={typeOptions}
@@ -82,7 +78,7 @@ const CategoriesPage = () => {
             placeholder="Опционально"
           />
           <Button type="submit" disabled={loading}>
-            {editingId ? 'Сохранить' : 'Добавить'}
+            {editingId ? 'Save' : 'Add'}
           </Button>
         </form>
         {loading && <Loader />}
@@ -95,13 +91,13 @@ const CategoriesPage = () => {
           <div key={cat._id} className="list-row">
             <div>
               <div className="list-title">{cat.name}</div>
-              <div className="muted small">Тип: {cat.type}</div>
+              <div className="muted small">Type: {cat.type}</div>
               {cat.comment && <div className="small">{cat.comment}</div>}
             </div>
             <div className="list-actions">
-              <Button onClick={() => handleEdit(cat)}>Редактировать</Button>
+              <Button onClick={() => handleEdit(cat)}>Edit</Button>
               <Button onClick={() => dispatch(deleteCategory(cat._id))} disabled={loading}>
-                Удалить
+                Delete
               </Button>
             </div>
           </div>

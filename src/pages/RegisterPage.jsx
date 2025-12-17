@@ -32,39 +32,36 @@ const RegisterPage = () => {
   return (
     <AuthLayout>
       <div className="auth-card">
-      <h2>Регистрация</h2>
+      <h2>Register</h2>
       <form onSubmit={handleSubmit}>
         <Input
-          label="Наименование"
+          label="Name"
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Ваше имя"
+          placeholder="Your name"
         />
-        <p className="helper-text">Имя должно содержать минимум 2 символа.</p>
         <Input
-          label="Электронная почта"
+          label="Email"
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="you@example.com"
         />
-        <p className="helper-text">Введите корректный email в формате example@mail.ru.</p>
         <Input
-          label="Пароль"
+          label="Password"
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="••••••••"
         />
-        <p className="helper-text">Пароль должен содержать минимум 6 символов.</p>
         <Button type="submit" disabled={loading}>
-          {loading ? 'Регистрируем...' : 'Зарегистрироваться'}
+          {loading ? 'Registering...' : 'Register'}
         </Button>
       </form>
       {loading && <Loader />}
       {error && <p className="error-text">{error}</p>}
       <p className="muted">
-        Уже есть аккаунт? <Link to="/login">Войти</Link>
+        Already have an account? <Link to="/login">Login</Link>
       </p>
       </div>
     </AuthLayout>

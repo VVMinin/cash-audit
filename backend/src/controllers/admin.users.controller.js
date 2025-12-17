@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 
+// Административное управление пользователями (CRUD)
+
 const toPublic = (user) => ({
   id: user._id,
   email: user.email,
@@ -13,6 +15,23 @@ exports.list = async (req, res, next) => {
     const users = await User.find().select('email name role')
     console.log('[admin] list users by', req.user.id)
     res.json({ users: users.map(toPublic) })
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.create = async (req, res, next) => {
+  try {
+    const { email, password, name, role = 'user' } = req.body
+    if (!email || !password || !name) {
+      return res.status(400).json({ error: 'email, password, name are required' })
+    }
+    const exists = await User.findOne({ email })
+    if (exists) return res.status(409).json({ error: 'Email already in use' })
+    const hash = await bcrypt.hash(password, 10)
+    const user = await User.create({ email, password: hash, name, role })
+    console.log('[admin] created user', user._id.toString())
+    res.status(201).json({ user: toPublic(user) })
   } catch (err) {
     next(err)
   }

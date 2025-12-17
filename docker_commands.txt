@@ -1,0 +1,56 @@
+1) Подключение к серверу
+ssh root@94.241.140.88
+
+2) Переход в папку проекта
+cd /path/to/project
+
+3) Запуск (первый раз или после изменений)
+docker compose build --no-cache
+docker compose up -d
+
+4) Просмотр запущенных контейнеров
+docker ps
+
+5) Просмотр логов backend
+docker compose logs backend
+
+6) Просмотр логов frontend
+docker compose logs frontend
+
+7) Остановка проекта
+docker compose down
+
+8) Перезапуск проекта
+docker compose down
+docker compose up -d
+
+9) Полное удаление проекта из Docker
+- остановить и удалить контейнеры:
+docker compose down --volumes --remove-orphans
+- удалить образы проекта:
+docker images
+docker rmi <image_id>
+
+10) Очистка неиспользуемых ресурсов (по желанию)
+docker system prune -f
+
+
+Сборка фронта:
+docker build -t cash-audit-frontend -f frontend/Dockerfile .
+Сборка бека:
+docker build -t cash-audit-backend -f backend/Dockerfile .
+
+Запуск фронта:
+docker run -d -p 80:80 --name cash-audit-frontend cash-audit-frontend
+Запуск бека:
+docker run -d -p 5000:5000 --name cash-audit-backend cash-audit-backend
+
+Удалить репозиторий:
+rm -rf cash-audit
+
+https://github.com/VVMinin/cash-audit.git
+
+Просмтр контейнеров:
+docker ps
+
+Удаление всех контейнеров:
