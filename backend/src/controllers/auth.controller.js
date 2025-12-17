@@ -11,50 +11,75 @@ const toPublicUser = (user) => ({
 });
 
 exports.register = async (req, res, next) => {
-  const { name, email, password } = req.body;
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ error: 'Name, email and password are required' });
-  }
-
   try {
-    const existing = await User.findOne({ email });
-    if (existing) {
-      return res.status(409).json({ error: 'User already exists' });
+    const { name, email, password } = req.body;
+
+    if (!name || !email || !password) {
+      return res.status(400).json({ error: 'Имя, email и пароль обязательны' });
     }
 
-    const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed });
-    const token = generateToken(user._id.toString(), user.role);
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({ error: 'Пользователь уже существует' });
+    }
 
-    return res.status(201).json({ user: toPublicUser(user), token });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = await User.create({
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      password: hashedPassword
+    });
+
+    if (!user || !user._id) {
+      console.error('Ошибка: пользователь не создан');
+      return res.status(500).json({ error: 'Ошибка создания пользователя' });
+    }
+
+    const token = generateToken(user._id.toString(), user.role || 'user');
+
+    console.log('Пользователь успешно создан:', user.email);
+
+    return res.status(201).json({
+      token,
+      user: toPublicUser(user)
+    });
   } catch (err) {
-    return next(err);
+    console.error('Ошибка регистрации:', err);
+    if (err.code === 11000) {
+      return res.status(400).json({ error: 'Пользователь с таким email уже существует' });
+    }
+    return res.status(500).json({ error: 'Ошибка регистрации' });
   }
 };
 
 exports.login = async (req, res, next) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: 'Email and password are required' });
-  }
-
   try {
-    const user = await User.findOne({ email });
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: 'Email и пароль обязательны' });
+    }
+
+    const user = await User.findOne({ email: email.trim().toLowerCase() });
     if (!user) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Неверный email или пароль' });
     }
 
     const match = await bcrypt.compare(password, user.password);
     if (!match) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: 'Неверный email или пароль' });
     }
 
-    const token = generateToken(user._id.toString(), user.role);
-    return res.json({ user: toPublicUser(user), token });
+    const token = generateToken(user._id.toString(), user.role || 'user');
+    
+    return res.status(200).json({
+      token,
+      user: toPublicUser(user)
+    });
   } catch (err) {
-    return next(err);
+    console.error('Ошибка входа:', err);
+    return res.status(500).json({ error: 'Ошибка входа' });
   }
 };
 

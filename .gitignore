@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Deleted components (worktree fix)
+src/components/accounts/AccountsSummary.jsx
+src/components/accounts/AccountsSummary.css

@@ -31,9 +31,16 @@ export const register = createAsyncThunk(
   async ({ name, email, password }, { rejectWithValue }) => {
     try {
       const res = await api.post('/auth/register', { name, email, password })
+      
+      if (!res.data || !res.data.token || !res.data.user) {
+        console.error('Некорректный ответ сервера:', res.data)
+        return rejectWithValue('Некорректный ответ сервера при регистрации')
+      }
+      
       return res.data
     } catch (err) {
-      const message = err.response?.data?.error || 'Registration failed'
+      const message = err.response?.data?.error || err.message || 'Ошибка регистрации'
+      console.error('Ошибка регистрации:', err)
       return rejectWithValue(message)
     }
   }
@@ -44,9 +51,16 @@ export const login = createAsyncThunk(
   async ({ email, password }, { rejectWithValue }) => {
     try {
       const res = await api.post('/auth/login', { email, password })
+      
+      if (!res.data || !res.data.token || !res.data.user) {
+        console.error('Некорректный ответ сервера:', res.data)
+        return rejectWithValue('Некорректный ответ сервера при входе')
+      }
+      
       return res.data
     } catch (err) {
-      const message = err.response?.data?.error || 'Login failed'
+      const message = err.response?.data?.error || err.message || 'Ошибка входа'
+      console.error('Ошибка входа:', err)
       return rejectWithValue(message)
     }
   }
@@ -112,14 +126,16 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(register.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.user = action.payload.user
-        state.token = action.payload.token
-        if (state.token) {
-          localStorage.setItem('token', state.token)
-        }
-        if (state.user) {
-          localStorage.setItem('user', JSON.stringify(state.user))
+        if (action.payload && action.payload.token && action.payload.user) {
+          state.status = 'succeeded'
+          state.user = action.payload.user
+          state.token = action.payload.token
+          state.error = null
+          localStorage.setItem('token', action.payload.token)
+          localStorage.setItem('user', JSON.stringify(action.payload.user))
+        } else {
+          state.status = 'failed'
+          state.error = 'Некорректный ответ сервера'
         }
       })
       .addCase(register.rejected, (state, action) => {
@@ -131,14 +147,16 @@ const authSlice = createSlice({
         state.error = null
       })
       .addCase(login.fulfilled, (state, action) => {
-        state.status = 'succeeded'
-        state.user = action.payload.user
-        state.token = action.payload.token
-        if (state.token) {
-          localStorage.setItem('token', state.token)
-        }
-        if (state.user) {
-          localStorage.setItem('user', JSON.stringify(state.user))
+        if (action.payload && action.payload.token && action.payload.user) {
+          state.status = 'succeeded'
+          state.user = action.payload.user
+          state.token = action.payload.token
+          state.error = null
+          localStorage.setItem('token', action.payload.token)
+          localStorage.setItem('user', JSON.stringify(action.payload.user))
+        } else {
+          state.status = 'failed'
+          state.error = 'Некорректный ответ сервера'
         }
       })
       .addCase(login.rejected, (state, action) => {
