@@ -1,32 +1,17 @@
-version: '3.9'
-
 services:
   backend:
-    build:
-      context: ./backend
+    build: ./backend
     env_file:
       - ./backend/.env
-    ports:
-      - "5000:5000"
-    depends_on:
-      - mongo
+    restart: always
+    expose:
+      - "5000"
 
   frontend:
-    build:
-      context: .
-      dockerfile: ./Dockerfile.frontend
+    build: ./frontend
+    restart: always
     ports:
-      - "4173:4173"
+      - "80:80"
     depends_on:
       - backend
-
-  mongo:
-    image: mongo:7
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-
-volumes:
-  mongo-data:
 
