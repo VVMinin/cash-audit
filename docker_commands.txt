@@ -45,6 +45,9 @@ docker run -d -p 80:80 --name cash-audit-frontend cash-audit-frontend
 Запуск бека:
 docker run -d -p 5000:5000 --name cash-audit-backend cash-audit-backend
 
+
+
+
 Удалить репозиторий:
 rm -rf cash-audit
 
@@ -52,6 +55,11 @@ https://github.com/VVMinin/cash-audit.git
 
 Просмтр контейнеров:
 docker ps
+
+Удаление всех контейнеров:
+docker stop $(docker ps -q) остановка
+docker container prune удаление
+
 
 1.Удаление контейнеров:
 docker rm -f cash-audit-frontend || true

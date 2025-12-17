@@ -1,14 +1,25 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../services/api'
 
-// Token хранится в localStorage ради простоты дипломного проекта.
-// В продакшене предпочтительнее httpOnly cookie.
-const tokenFromStorage = localStorage.getItem('token')
-const userFromStorage = localStorage.getItem('user')
+const getStoredUser = () => {
+  try {
+    const raw = localStorage.getItem('user')
+    if (!raw || raw === 'undefined') return null
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
+}
+
+const tokenFromStorage = (() => {
+  const raw = localStorage.getItem('token')
+  return raw && raw !== 'undefined' ? raw : null
+})()
+const userFromStorage = getStoredUser()
 
 const initialState = {
-  user: userFromStorage ? JSON.parse(userFromStorage) : null,
-  token: tokenFromStorage || null,
+  user: userFromStorage,
+  token: tokenFromStorage,
   status: 'idle',
   error: null,
   updateStatus: 'idle',
@@ -104,8 +115,12 @@ const authSlice = createSlice({
         state.status = 'succeeded'
         state.user = action.payload.user
         state.token = action.payload.token
-        localStorage.setItem('token', action.payload.token)
-        localStorage.setItem('user', JSON.stringify(action.payload.user))
+        if (state.token) {
+          localStorage.setItem('token', state.token)
+        }
+        if (state.user) {
+          localStorage.setItem('user', JSON.stringify(state.user))
+        }
       })
       .addCase(register.rejected, (state, action) => {
         state.status = 'failed'
@@ -119,8 +134,12 @@ const authSlice = createSlice({
         state.status = 'succeeded'
         state.user = action.payload.user
         state.token = action.payload.token
-        localStorage.setItem('token', action.payload.token)
-        localStorage.setItem('user', JSON.stringify(action.payload.user))
+        if (state.token) {
+          localStorage.setItem('token', state.token)
+        }
+        if (state.user) {
+          localStorage.setItem('user', JSON.stringify(state.user))
+        }
       })
       .addCase(login.rejected, (state, action) => {
         state.status = 'failed'
