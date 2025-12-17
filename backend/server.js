@@ -9,8 +9,8 @@ dotenv.config();
 
 const app = express();
 
-// Более точная настройка CORS
-app.use(cors({ origin: 'http://94.241.140.88' }));
+// Разрешаем все CORS-запросы
+app.use(cors());
 app.use(express.json());
 
 app.get('/health', (req, res) => {
