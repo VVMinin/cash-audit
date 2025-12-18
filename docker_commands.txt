@@ -60,6 +60,9 @@ docker ps
 docker stop $(docker ps -q) остановка
 docker container prune удаление
 
+Статус контейнеров:
+docker ps -a
+
 
 1.Удаление контейнеров:
 docker rm -f cash-audit-frontend || true
@@ -73,3 +76,6 @@ docker rm -f cash-audit-backend || true
     docker run -d -p 5000:5000 --net cash-audit-net --name cash-audit-backend cash-audit-backend
         docker run -d -p 80:4173 --net cash-audit-net --name cash-audit-frontend cash-audit-frontend
     
+
+  Эта команда покажет, активен ли файрвол и какие порты открыты:
+ sudo ufw status
