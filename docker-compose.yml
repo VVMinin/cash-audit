@@ -8,7 +8,9 @@ services:
       - "5000:5000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     restart: always
     ports:
       - "80:80"

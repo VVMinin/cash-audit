@@ -2,8 +2,8 @@
 FROM node:18-alpine AS deps
 WORKDIR /app
 
-# Копируем package.json и package-lock.json именно из папки backend
-COPY backend/package*.json ./
+# Копируем package.json и package-lock.json из текущей папки backend
+COPY package*.json ./
 
 # Устанавливаем зависимости бэкенда
 RUN npm ci --omit=dev
@@ -16,8 +16,8 @@ WORKDIR /app
 # Копируем установленные зависимости из предыдущего этапа
 COPY --from=deps /app/node_modules ./node_modules
 
-# Копируем исходный код только бэкенда
-COPY backend/ .
+# Копируем исходный код бэкенда
+COPY . .
 
 EXPOSE 5000
 
