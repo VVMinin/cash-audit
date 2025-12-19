@@ -70,14 +70,21 @@ docker container prune удаление
 docker rm -f cash-audit-frontend || true
 docker rm -f cash-audit-backend || true
 
+Альтернатива сборки и запуска:
+docker compose down -v
+docker compose build --no-cache
+docker compose up -d
+
+
 2. Пересборка образов:
     docker build -t cash-audit-backend -f backend/Dockerfile .
     docker build -t cash-audit-frontend -f Dockerfile.frontend .
     
 3. Запуск образов:
 docker run -d -p 5000:5000 --net cash-audit-net --name cash-audit-backend cash-audit-backend
-docker run -d -p 80:4173 --net cash-audit-net --name cash-audit-frontend cash-audit-frontend
-    
+docker run -d -p 80:4173 --net cash-audit-net --name cash-audit-frontend cash-audit-frontend 
+или
+
 
   Эта команда покажет, активен ли файрвол и какие порты открыты:
  sudo ufw status
