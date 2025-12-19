@@ -23,7 +23,7 @@ const AccountsPage = () => {
     dispatch(fetchAccounts())
   }, [dispatch])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.name || !form.type) return
     // Баланс счета не может быть отрицательным
@@ -31,13 +31,18 @@ const AccountsPage = () => {
       alert('Баланс не может быть отрицательным')
       return
     }
-    if (editingId) {
-      dispatch(updateAccount({ id: editingId, ...form, balance: Number(form.balance) }))
-    } else {
-      dispatch(createAccount({ ...form, balance: Number(form.balance) }))
+    try {
+      if (editingId) {
+        await dispatch(updateAccount({ id: editingId, ...form, balance: Number(form.balance) })).unwrap()
+      } else {
+        await dispatch(createAccount({ ...form, balance: Number(form.balance) })).unwrap()
+      }
+      await dispatch(fetchAccounts())
+      setForm(initialForm)
+      setEditingId(null)
+    } catch (err) {
+      console.error('Failed to submit account form:', err)
     }
-    setForm(initialForm)
-    setEditingId(null)
   }
 
   const handleEdit = (acc) => {

@@ -23,16 +23,21 @@ const CategoriesPage = () => {
     dispatch(fetchCategories())
   }, [dispatch])
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.name || !form.type) return
-    if (editingId) {
-      dispatch(updateCategory({ id: editingId, ...form }))
-    } else {
-      dispatch(createCategory(form))
+    try {
+      if (editingId) {
+        await dispatch(updateCategory({ id: editingId, ...form })).unwrap()
+      } else {
+        await dispatch(createCategory(form)).unwrap()
+      }
+      await dispatch(fetchCategories())
+      setForm(initialForm)
+      setEditingId(null)
+    } catch (err) {
+      console.error('Failed to submit category form:', err)
     }
-    setForm(initialForm)
-    setEditingId(null)
   }
 
   const handleEdit = (cat) => {
