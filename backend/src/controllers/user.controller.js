@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs')
 const User = require('../models/User')
 
 const toPublicUser = (user) => ({
@@ -45,6 +46,32 @@ exports.listAll = async (req, res, next) => {
   try {
     const users = await User.find().select('name email role createdAt')
     res.json({ users: users.map(toPublicUser) })
+  } catch (err) {
+    next(err)
+  }
+}
+
+exports.changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ error: 'Требуются текущий и новый пароль' })
+    }
+
+    const user = await User.findById(req.user.id)
+    if (!user) return res.status(404).json({ error: 'User not found' })
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password)
+    if (!isMatch) {
+      return res.status(400).json({ error: 'Текущий пароль неверный' })
+    }
+
+    const salt = await bcrypt.genSalt(10)
+    user.password = await bcrypt.hash(newPassword, salt)
+    await user.save()
+
+    res.json({ message: 'Пароль успешно изменён' })
   } catch (err) {
     next(err)
   }

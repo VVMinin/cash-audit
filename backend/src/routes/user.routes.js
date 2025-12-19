@@ -9,6 +9,7 @@ router.use(auth)
 
 router.get('/me', controller.getMe)
 router.put('/me', controller.updateMe)
+router.patch('/change-password', controller.changePassword)
 router.get('/', admin, controller.listAll)
 
 module.exports = router

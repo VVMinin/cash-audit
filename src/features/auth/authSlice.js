@@ -24,6 +24,9 @@ const initialState = {
   error: null,
   updateStatus: 'idle',
   updateError: null,
+  changePasswordStatus: 'idle',
+  changePasswordError: null,
+  changePasswordMessage: null,
 }
 
 export const register = createAsyncThunk(
@@ -61,6 +64,23 @@ export const login = createAsyncThunk(
     } catch (err) {
       const message = err.response?.data?.error || err.message || 'Ошибка входа'
       console.error('Ошибка входа:', err)
+      return rejectWithValue(message)
+    }
+  }
+)
+
+export const changePassword = createAsyncThunk(
+  'auth/changePassword',
+  async ({ currentPassword, newPassword }, { rejectWithValue }) => {
+    try {
+      const res = await api.patch('/users/change-password', { currentPassword, newPassword })
+      if (!res.data || !res.data.message) {
+        console.error('Некорректный ответ сервера при смене пароля:', res.data)
+        return rejectWithValue('Некорректный ответ сервера при смене пароля')
+      }
+      return res.data.message
+    } catch (err) {
+      const message = err.response?.data?.error || err.message || 'Ошибка смены пароля'
       return rejectWithValue(message)
     }
   }
@@ -191,6 +211,19 @@ const authSlice = createSlice({
       .addCase(updateProfile.rejected, (state, action) => {
         state.updateStatus = 'failed'
         state.updateError = action.payload
+      })
+      .addCase(changePassword.pending, (state) => {
+        state.changePasswordStatus = 'loading'
+        state.changePasswordError = null
+        state.changePasswordMessage = null
+      })
+      .addCase(changePassword.fulfilled, (state, action) => {
+        state.changePasswordStatus = 'succeeded'
+        state.changePasswordMessage = action.payload || 'Пароль успешно изменён'
+      })
+      .addCase(changePassword.rejected, (state, action) => {
+        state.changePasswordStatus = 'failed'
+        state.changePasswordError = action.payload
       })
   },
 })
