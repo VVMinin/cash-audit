@@ -46,7 +46,8 @@ docker run -d -p 80:80 --name cash-audit-frontend cash-audit-frontend
 docker run -d -p 5000:5000 --name cash-audit-backend cash-audit-backend
 
 
-
+Подключение к серверу: 
+ssh root@94.241.140.88
 
 Удалить репозиторий:
 rm -rf cash-audit
@@ -56,12 +57,13 @@ https://github.com/VVMinin/cash-audit.git
 Просмтр контейнеров:
 docker ps
 
+Статус контейнеров:
+docker ps -a
+
+
 Удаление всех контейнеров:
 docker stop $(docker ps -q) остановка
 docker container prune удаление
-
-Статус контейнеров:
-docker ps -a
 
 
 1.Удаление контейнеров:
@@ -79,3 +81,7 @@ docker run -d -p 80:4173 --net cash-audit-net --name cash-audit-frontend cash-au
 
   Эта команда покажет, активен ли файрвол и какие порты открыты:
  sudo ufw status
+
+ Просмотр логов:
+ docker logs cash-audit-backend
+  docker logs cash-audit-frontend
