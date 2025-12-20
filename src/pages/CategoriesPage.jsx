@@ -18,6 +18,7 @@ const CategoriesPage = () => {
   const { items, status, error } = useSelector((state) => state.categories)
   const [form, setForm] = useState(initialForm)
   const [editingId, setEditingId] = useState(null)
+  const [localError, setLocalError] = useState(null)
 
   useEffect(() => {
     dispatch(fetchCategories())
@@ -25,7 +26,11 @@ const CategoriesPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.name || !form.type) return
+    setLocalError(null)
+    if (!form.name || !form.type) {
+      setLocalError('Заполните наименование и выберите тип категории')
+      return
+    }
     try {
       if (editingId) {
         await dispatch(updateCategory({ id: editingId, ...form })).unwrap()
@@ -48,8 +53,9 @@ const CategoriesPage = () => {
   const loading = status === 'loading'
 
   const typeOptions = [
-    { value: 'income', label: 'Income' },
-    { value: 'expense', label: 'Expense' },
+    { value: '', label: 'Выберите тип', disabled: true },
+    { value: 'income', label: 'Доход' },
+    { value: 'expense', label: 'Расход' },
   ]
 
   return (
@@ -87,7 +93,7 @@ const CategoriesPage = () => {
           </Button>
         </form>
         {loading && <Loader />}
-        {error && <p className="error-text">{error}</p>}
+        {(error || localError) && <p className="error-text">{localError || error}</p>}
       </div>
 
       <div className="card list">
