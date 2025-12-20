@@ -91,8 +91,19 @@ const TransactionsPage = () => {
           <Input
             label="Page size"
             type="number"
+            min="0"
+            step="1"
             value={filters.limit}
-            onChange={(e) => setFilters((f) => ({ ...f, limit: Number(e.target.value) || 10, page: 1 }))}
+            onChange={(e) => {
+              const raw = e.target.value
+              if (raw === '') {
+                setFilters((f) => ({ ...f, limit: '', page: 1 }))
+                return
+              }
+              const value = Number(raw)
+              if (value < 0) return
+              setFilters((f) => ({ ...f, limit: value || 10, page: 1 }))
+            }}
             required={true}
           />
         </div>
@@ -117,7 +128,16 @@ const TransactionsPage = () => {
                 {tx.amount}
               </div>
               <Button onClick={() => navigate(`/transactions/${tx._id}/edit`)}>Edit</Button>
-              <Button onClick={() => dispatch(deleteTransaction(tx._id))} disabled={loading}>
+              <Button
+                onClick={() =>
+                  dispatch(deleteTransaction(tx._id)).then((res) => {
+                    if (res.meta.requestStatus === 'fulfilled') {
+                      dispatch(fetchTransactions(filters))
+                    }
+                  })
+                }
+                disabled={loading}
+              >
                 Delete
               </Button>
             </div>

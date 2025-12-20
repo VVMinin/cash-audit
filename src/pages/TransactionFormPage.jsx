@@ -10,6 +10,7 @@ import {
   fetchTransaction,
   updateTransaction,
   clearCurrent,
+  fetchTransactions,
 } from '../features/transactions/transactionsSlice'
 import { fetchAccounts } from '../features/accounts/accountsSlice'
 import { fetchCategories } from '../features/categories/categoriesSlice'
@@ -62,13 +63,20 @@ const TransactionFormPage = () => {
   const handleSubmit = (e) => {
     e.preventDefault()
     if (!form.account || !form.category || !form.amount || !form.date) return
+    if (Number(form.amount) < 0) return
     if (isEdit) {
       dispatch(updateTransaction({ id, ...form })).then((res) => {
-        if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
+        if (res.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchTransactions({ limit: 20, page: 1 }))
+          navigate('/transactions')
+        }
       })
     } else {
       dispatch(createTransaction(form)).then((res) => {
-        if (res.meta.requestStatus === 'fulfilled') navigate('/transactions')
+        if (res.meta.requestStatus === 'fulfilled') {
+          dispatch(fetchTransactions({ limit: 20, page: 1 }))
+          navigate('/transactions')
+        }
       })
     }
   }
@@ -105,8 +113,19 @@ const TransactionFormPage = () => {
           <Input
             label="Amount"
             type="number"
+            min="0"
+            step="1"
             value={form.amount}
-            onChange={(e) => setForm((f) => ({ ...f, amount: Number(e.target.value) }))}
+            onChange={(e) => {
+              const raw = e.target.value
+              if (raw === '') {
+                setForm((f) => ({ ...f, amount: '' }))
+                return
+              }
+              const value = Number(raw)
+              if (value < 0) return
+              setForm((f) => ({ ...f, amount: value }))
+            }}
             placeholder="0"
           />
           <Input

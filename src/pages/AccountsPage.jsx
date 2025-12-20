@@ -98,8 +98,19 @@ const AccountsPage = () => {
           <Input
             label="Начальный баланс"
             type="number"
+            min="0"
+            step="1"
             value={form.balance}
-            onChange={(e) => setForm((f) => ({ ...f, balance: Number(e.target.value) }))}
+            onChange={(e) => {
+              const raw = e.target.value
+              if (raw === '') {
+                setForm((f) => ({ ...f, balance: '' }))
+                return
+              }
+              const value = Number(raw)
+              if (value < 0) return
+              setForm((f) => ({ ...f, balance: value }))
+            }}
             placeholder="0"
           />
           <Input
