@@ -83,7 +83,6 @@ docker compose up -d
 3. Запуск образов:
 docker run -d -p 5000:5000 --net cash-audit-net --name cash-audit-backend cash-audit-backend
 docker run -d -p 80:4173 --net cash-audit-net --name cash-audit-frontend cash-audit-frontend 
-или
 
 
   Эта команда покажет, активен ли файрвол и какие порты открыты:
