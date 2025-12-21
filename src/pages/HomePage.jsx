@@ -67,7 +67,6 @@ const HomePage = () => {
         <div>
           <h2>Welcome{user?.name ? `, ${user.name}` : ''}</h2>
         </div>
-        <Button onClick={() => dispatch(logout())}>Logout</Button>
       </header>
       <div className="card">
         <p>Здесь аналитика и ссылки на разделы.</p>
