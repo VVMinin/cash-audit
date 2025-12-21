@@ -52,7 +52,7 @@ const TransactionsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Transactions</h2>
+          <h2>Операции</h2>
           <p className="muted">История доходов и расходов с фильтрами и пагинацией</p>
         </div>
         <Button onClick={() => navigate('/transactions/new')}>+ New</Button>

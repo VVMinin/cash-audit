@@ -62,7 +62,7 @@ const CategoriesPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Categories</h2>
+          <h2>Категории</h2>
           <p className="muted">Доходы и расходы</p>
         </div>
       </header>

@@ -76,7 +76,7 @@ const AccountsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Accounts</h2>
+          <h2>Счета</h2>
           <p className="muted">Добавление, редактирование, удаление счетов</p>
         </div>
       </header>

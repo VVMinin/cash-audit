@@ -65,7 +65,7 @@ const HomePage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Welcome{user?.name ? `, ${user.name}` : ''}</h2>
+          <h2>Добро пожаловать{user?.name ? `, ${user.name}` : ''}</h2>
         </div>
       </header>
       <div className="card">

@@ -69,7 +69,7 @@ const SettingsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Settings</h2>
+          <h2>Настройки учетной записи</h2>
           <p className="muted">Редактирование профиля пользователя</p>
         </div>
       </header>
