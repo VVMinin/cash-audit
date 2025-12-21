@@ -76,7 +76,7 @@ const AccountsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Счета</h2>
+          <h2>Accounts</h2>
           <p className="muted">Добавление, редактирование, удаление счетов</p>
         </div>
       </header>
@@ -84,13 +84,13 @@ const AccountsPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Name"
+            label="Название"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Напр. Основная карта"
           />
           <Select
-            label="Type"
+            label="Тип счета"
             value={form.type}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
             options={accountTypeOptions}

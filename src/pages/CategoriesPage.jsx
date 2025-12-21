@@ -70,13 +70,13 @@ const CategoriesPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Name"
+            label="Название категории"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Напр. Зарплата"
           />
           <Select
-            label="Type"
+            label="Тип категории"
             value={form.type}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
             options={typeOptions}

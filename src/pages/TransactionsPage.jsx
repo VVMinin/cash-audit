@@ -61,35 +61,35 @@ const TransactionsPage = () => {
       <div className="card">
         <div className="grid">
           <Select
-            label="Account"
+            label="Счет"
             value={filters.account}
             onChange={(e) => setFilters((f) => ({ ...f, account: e.target.value, page: 1 }))}
             required={false}
             options={[{ value: '', label: 'All accounts' }, ...accounts.map((a) => ({ value: a._id, label: a.name }))]}
           />
           <Select
-            label="Category"
+            label="Категория"
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value, page: 1 }))}
             required={false}
             options={[{ value: '', label: 'All categories' }, ...categories.map((c) => ({ value: c._id, label: c.name }))]}
           />
           <Input
-            label="Date from"
+            label="Дата с "
             type="date"
             value={filters.dateFrom}
             onChange={(e) => setFilters((f) => ({ ...f, dateFrom: e.target.value, page: 1 }))}
             required={false}
           />
           <Input
-            label="Date to"
+            label="Дата по"
             type="date"
             value={filters.dateTo}
             onChange={(e) => setFilters((f) => ({ ...f, dateTo: e.target.value, page: 1 }))}
             required={false}
           />
           <Input
-            label="Page size"
+            label="Отображение операций"
             type="number"
             min="0"
             step="1"
