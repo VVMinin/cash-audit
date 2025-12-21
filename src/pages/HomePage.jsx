@@ -66,7 +66,6 @@ const HomePage = () => {
       <header className="page-header">
         <div>
           <h2>Welcome{user?.name ? `, ${user.name}` : ''}</h2>
-          <p className="muted">Главная заглушка (доступна только авторизованным)</p>
         </div>
         <Button onClick={() => dispatch(logout())}>Logout</Button>
       </header>
