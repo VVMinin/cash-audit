@@ -77,7 +77,7 @@ const SettingsPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Name"
+            label="Имя пользователя"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
@@ -88,7 +88,7 @@ const SettingsPage = () => {
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
           />
           <Button type="submit" disabled={loading}>
-            Save
+            Подтвердить изменения
           </Button>
         </form>
         {loading && <Loader />}
