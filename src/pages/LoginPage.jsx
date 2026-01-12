@@ -17,13 +17,15 @@ const LoginPage = () => {
   useEffect(() => {
     if (token) {
       dispatch(fetchMe())
+    }
+  }, [token, dispatch])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const result = await dispatch(login({ email, password }))
+    if (login.fulfilled.match(result)) {
       navigate('/')
     }
-  }, [token, dispatch, navigate])
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    dispatch(login({ email, password }))
   }
 
   const loading = status === 'loading'

@@ -1,6 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../api/axios'
 
+const normalizeAccount = (acc) => {
+  if (!acc) return acc
+  const id = acc.id || acc._id
+  const { _id, ...rest } = acc
+  return { ...rest, id }
+}
+
 const initialState = {
   items: [],
   status: 'idle',
@@ -65,7 +72,7 @@ const accountsSlice = createSlice({
       })
       .addCase(fetchAccounts.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.items = action.payload
+        state.items = action.payload.map(normalizeAccount)
       })
       .addCase(fetchAccounts.rejected, (state, action) => {
         state.status = 'failed'
@@ -77,7 +84,7 @@ const accountsSlice = createSlice({
       })
       .addCase(createAccount.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.items.unshift(action.payload)
+        state.items.unshift(normalizeAccount(action.payload))
       })
       .addCase(createAccount.rejected, (state, action) => {
         state.status = 'failed'
@@ -89,16 +96,15 @@ const accountsSlice = createSlice({
       })
       .addCase(updateAccount.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.items = state.items.map((acc) =>
-          acc._id === action.payload._id ? action.payload : acc
-        )
+        const updated = normalizeAccount(action.payload)
+        state.items = state.items.map((acc) => (acc.id === updated.id ? updated : acc))
       })
       .addCase(updateAccount.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.payload
       })
       .addCase(deleteAccount.fulfilled, (state, action) => {
-        state.items = state.items.filter((acc) => acc._id !== action.payload)
+        state.items = state.items.filter((acc) => acc.id !== action.payload)
       })
   },
 })

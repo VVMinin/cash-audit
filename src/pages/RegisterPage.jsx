@@ -18,13 +18,15 @@ const RegisterPage = () => {
   useEffect(() => {
     if (token) {
       dispatch(fetchMe())
+    }
+  }, [token, dispatch])
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const result = await dispatch(register({ name, email, password }))
+    if (register.fulfilled.match(result)) {
       navigate('/')
     }
-  }, [token, dispatch, navigate])
-
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    dispatch(register({ name, email, password }))
   }
 
   const loading = status === 'loading'

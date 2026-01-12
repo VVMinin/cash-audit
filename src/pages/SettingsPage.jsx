@@ -69,7 +69,7 @@ const SettingsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Настройки учетной записи</h2>
+          <h2>Settings</h2>
           <p className="muted">Редактирование профиля пользователя</p>
         </div>
       </header>
@@ -77,7 +77,7 @@ const SettingsPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Имя пользователя"
+            label="Name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
           />
@@ -88,7 +88,7 @@ const SettingsPage = () => {
             onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
           />
           <Button type="submit" disabled={loading}>
-            Подтвердить изменения
+            Save
           </Button>
         </form>
         {loading && <Loader />}

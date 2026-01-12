@@ -37,7 +37,6 @@ const AccountsPage = () => {
       } else {
         await dispatch(createAccount({ ...form, balance: Number(form.balance) })).unwrap()
       }
-      await dispatch(fetchAccounts())
       setForm(initialForm)
       setEditingId(null)
     } catch (err) {
@@ -46,7 +45,7 @@ const AccountsPage = () => {
   }
 
   const handleEdit = (acc) => {
-    setEditingId(acc._id)
+    setEditingId(acc.id)
     setForm({
       name: acc.name,
       type: acc.type,
@@ -76,7 +75,7 @@ const AccountsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Счета</h2>
+          <h2>Accounts</h2>
           <p className="muted">Добавление, редактирование, удаление счетов</p>
         </div>
       </header>
@@ -84,13 +83,13 @@ const AccountsPage = () => {
       <div className="card">
         <form className="grid" onSubmit={handleSubmit}>
           <Input
-            label="Название"
+            label="Name"
             value={form.name}
             onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
             placeholder="Напр. Основная карта"
           />
           <Select
-            label="Тип счета"
+            label="Type"
             value={form.type}
             onChange={(e) => setForm((f) => ({ ...f, type: e.target.value }))}
             options={accountTypeOptions}
@@ -132,7 +131,7 @@ const AccountsPage = () => {
       <div className="card list">
         {items.length === 0 && <p className="muted">Пока нет счетов</p>}
         {items.map((acc) => (
-          <div key={acc._id} className="list-row">
+          <div key={acc.id} className="list-row">
             <div>
               <div className="list-title">{acc.name}</div>
               <div className="muted small">Type: {acc.type}</div>
@@ -141,7 +140,7 @@ const AccountsPage = () => {
             </div>
             <div className="list-actions">
               <Button onClick={() => handleEdit(acc)}>Edit</Button>
-              <Button onClick={() => dispatch(deleteAccount(acc._id))} disabled={loading}>
+              <Button onClick={() => dispatch(deleteAccount(acc.id))} disabled={loading}>
                 Delete
               </Button>
             </div>

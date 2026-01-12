@@ -1,6 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../api/axios'
 
+const normalizeCategory = (cat) => {
+  if (!cat) return cat
+  const id = cat.id || cat._id
+  const { _id, ...rest } = cat
+  return { ...rest, id }
+}
+
 const initialState = {
   items: [],
   status: 'idle',
@@ -71,22 +78,21 @@ const categoriesSlice = createSlice({
       })
       .addCase(fetchCategories.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.items = action.payload
+        state.items = action.payload.map(normalizeCategory)
       })
       .addCase(fetchCategories.rejected, (state, action) => {
         state.status = 'failed'
         state.error = action.payload
       })
       .addCase(createCategory.fulfilled, (state, action) => {
-        state.items.unshift(action.payload)
+        state.items.unshift(normalizeCategory(action.payload))
       })
       .addCase(updateCategory.fulfilled, (state, action) => {
-        state.items = state.items.map((cat) =>
-          cat._id === action.payload._id ? action.payload : cat
-        )
+        const updated = normalizeCategory(action.payload)
+        state.items = state.items.map((cat) => (cat.id === updated.id ? updated : cat))
       })
       .addCase(deleteCategory.fulfilled, (state, action) => {
-        state.items = state.items.filter((cat) => cat._id !== action.payload)
+        state.items = state.items.filter((cat) => cat.id !== action.payload)
       })
   },
 })

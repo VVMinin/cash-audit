@@ -10,7 +10,6 @@ import {
   fetchTransaction,
   updateTransaction,
   clearCurrent,
-  fetchTransactions,
 } from '../features/transactions/transactionsSlice'
 import { fetchAccounts } from '../features/accounts/accountsSlice'
 import { fetchCategories } from '../features/categories/categoriesSlice'
@@ -51,8 +50,8 @@ const TransactionFormPage = () => {
   useEffect(() => {
     if (current && isEdit) {
       setForm({
-        account: current.account?._id || '',
-        category: current.category?._id || '',
+        account: current.account?.id || '',
+        category: current.category?.id || '',
         amount: current.amount,
         comment: current.comment || '',
         date: current.date ? current.date.slice(0, 10) : '',
@@ -67,14 +66,12 @@ const TransactionFormPage = () => {
     if (isEdit) {
       dispatch(updateTransaction({ id, ...form })).then((res) => {
         if (res.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchTransactions({ limit: 20, page: 1 }))
           navigate('/transactions')
         }
       })
     } else {
       dispatch(createTransaction(form)).then((res) => {
         if (res.meta.requestStatus === 'fulfilled') {
-          dispatch(fetchTransactions({ limit: 20, page: 1 }))
           navigate('/transactions')
         }
       })
@@ -98,7 +95,7 @@ const TransactionFormPage = () => {
             onChange={(e) => setForm((f) => ({ ...f, account: e.target.value }))}
             options={[
               { value: '', label: 'Select account', disabled: true },
-              ...accounts.map((a) => ({ value: a._id, label: a.name })),
+              ...accounts.map((a) => ({ value: a.id, label: a.name })),
             ]}
           />
           <Select
@@ -107,7 +104,7 @@ const TransactionFormPage = () => {
             onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
             options={[
               { value: '', label: 'Select category', disabled: true },
-              ...categories.map((c) => ({ value: c._id, label: `${c.name} (${c.type})` })),
+              ...categories.map((c) => ({ value: c.id, label: `${c.name} (${c.type})` })),
             ]}
           />
           <Input

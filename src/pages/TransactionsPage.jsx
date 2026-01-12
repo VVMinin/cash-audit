@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 import Input from '../components/ui/Input'
@@ -27,20 +27,31 @@ const TransactionsPage = () => {
     limit: Number(searchParams.get('limit')) || 10,
   })
 
+  const params = useMemo(
+    () => ({
+      account: filters.account,
+      category: filters.category,
+      dateFrom: filters.dateFrom,
+      dateTo: filters.dateTo,
+      page: filters.page,
+      limit: filters.limit,
+    }),
+    [filters.account, filters.category, filters.dateFrom, filters.dateTo, filters.page, filters.limit]
+  )
+
   useEffect(() => {
     dispatch(fetchAccounts())
     dispatch(fetchCategories())
   }, [dispatch])
 
   useEffect(() => {
-    const params = { ...filters }
     setSearchParams(
       Object.fromEntries(
         Object.entries(params).filter(([_, v]) => v !== '' && v !== null && v !== undefined)
       )
     )
     dispatch(fetchTransactions(params))
-  }, [filters, dispatch, setSearchParams])
+  }, [params, dispatch])
 
   const handlePageChange = (newPage) => {
     setFilters((f) => ({ ...f, page: newPage }))
@@ -52,7 +63,7 @@ const TransactionsPage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Операции</h2>
+          <h2>Transactions</h2>
           <p className="muted">История доходов и расходов с фильтрами и пагинацией</p>
         </div>
         <Button onClick={() => navigate('/transactions/new')}>+ New</Button>
@@ -61,35 +72,35 @@ const TransactionsPage = () => {
       <div className="card">
         <div className="grid">
           <Select
-            label="Счет"
+            label="Account"
             value={filters.account}
             onChange={(e) => setFilters((f) => ({ ...f, account: e.target.value, page: 1 }))}
             required={false}
-            options={[{ value: '', label: 'All accounts' }, ...accounts.map((a) => ({ value: a._id, label: a.name }))]}
+            options={[{ value: '', label: 'All accounts' }, ...accounts.map((a) => ({ value: a.id, label: a.name }))]}
           />
           <Select
-            label="Категория"
+            label="Category"
             value={filters.category}
             onChange={(e) => setFilters((f) => ({ ...f, category: e.target.value, page: 1 }))}
             required={false}
-            options={[{ value: '', label: 'All categories' }, ...categories.map((c) => ({ value: c._id, label: c.name }))]}
+            options={[{ value: '', label: 'All categories' }, ...categories.map((c) => ({ value: c.id, label: c.name }))]}
           />
           <Input
-            label="Дата с "
+            label="Date from"
             type="date"
             value={filters.dateFrom}
             onChange={(e) => setFilters((f) => ({ ...f, dateFrom: e.target.value, page: 1 }))}
             required={false}
           />
           <Input
-            label="Дата по"
+            label="Date to"
             type="date"
             value={filters.dateTo}
             onChange={(e) => setFilters((f) => ({ ...f, dateTo: e.target.value, page: 1 }))}
             required={false}
           />
           <Input
-            label="Отображение операций"
+            label="Page size"
             type="number"
             min="0"
             step="1"
@@ -114,7 +125,7 @@ const TransactionsPage = () => {
       <div className="card list">
         {items.length === 0 && <p className="muted">Нет операций</p>}
         {items.map((tx) => (
-          <div key={tx._id} className="list-row">
+          <div key={tx.id} className="list-row">
             <div>
               <div className="list-title">{tx.category?.name || '—'}</div>
               <div className="muted small">
@@ -127,17 +138,8 @@ const TransactionsPage = () => {
                 {tx.type === 'expense' ? '-' : '+'}
                 {tx.amount}
               </div>
-              <Button onClick={() => navigate(`/transactions/${tx._id}/edit`)}>Edit</Button>
-              <Button
-                onClick={() =>
-                  dispatch(deleteTransaction(tx._id)).then((res) => {
-                    if (res.meta.requestStatus === 'fulfilled') {
-                      dispatch(fetchTransactions(filters))
-                    }
-                  })
-                }
-                disabled={loading}
-              >
+              <Button onClick={() => navigate(`/transactions/${tx.id}/edit`)}>Edit</Button>
+              <Button onClick={() => dispatch(deleteTransaction(tx.id))} disabled={loading}>
                 Delete
               </Button>
             </div>

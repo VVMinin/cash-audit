@@ -1,6 +1,25 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import api from '../../api/axios'
 
+const normalizeEntity = (obj) => {
+  if (!obj) return obj
+  const id = obj.id || obj._id
+  const { _id, ...rest } = obj
+  return { ...rest, id }
+}
+
+const normalizeTransaction = (tx) => {
+  if (!tx) return tx
+  const id = tx.id || tx._id
+  const { _id, ...rest } = tx
+  return {
+    ...rest,
+    id,
+    account: normalizeEntity(tx.account),
+    category: normalizeEntity(tx.category),
+  }
+}
+
 const initialState = {
   items: [],
   total: 0,
@@ -93,7 +112,7 @@ const transactionsSlice = createSlice({
       })
       .addCase(fetchTransactions.fulfilled, (state, action) => {
         state.status = 'succeeded'
-        state.items = action.payload.transactions
+        state.items = (action.payload.transactions || []).map(normalizeTransaction)
         state.total = action.payload.total
         state.page = action.payload.page
         state.pages = action.payload.pages
@@ -104,17 +123,20 @@ const transactionsSlice = createSlice({
         state.error = action.payload
       })
       .addCase(fetchTransaction.fulfilled, (state, action) => {
-        state.current = action.payload
+        state.current = normalizeTransaction(action.payload)
       })
       .addCase(createTransaction.fulfilled, (state, action) => {
-        state.items.unshift(action.payload)
+        const tx = normalizeTransaction(action.payload)
+        state.items.unshift(tx)
+        state.total += 1
       })
       .addCase(updateTransaction.fulfilled, (state, action) => {
-        state.items = state.items.map((tx) => (tx._id === action.payload._id ? action.payload : tx))
-        state.current = action.payload
+        const tx = normalizeTransaction(action.payload)
+        state.items = state.items.map((item) => (item.id === tx.id ? tx : item))
+        state.current = tx
       })
       .addCase(deleteTransaction.fulfilled, (state, action) => {
-        state.items = state.items.filter((tx) => tx._id !== action.payload)
+        state.items = state.items.filter((tx) => tx.id !== action.payload)
         state.total = Math.max(0, state.total - 1)
       })
   },

@@ -43,7 +43,7 @@ const HomePage = () => {
       .filter((t) => {
         if (filters.dateFrom && new Date(t.date) < new Date(filters.dateFrom)) return false
         if (filters.dateTo && new Date(t.date) > new Date(filters.dateTo)) return false
-        if (filters.category && t.category?._id !== filters.category) return false
+        if (filters.category && t.category?.id !== filters.category) return false
         if (filters.type !== 'all' && t.type !== filters.type) return false
         return true
       })
@@ -65,8 +65,10 @@ const HomePage = () => {
     <div className="page">
       <header className="page-header">
         <div>
-          <h2>Добро пожаловать{user?.name ? `, ${user.name}` : ''}</h2>
+          <h2>Welcome{user?.name ? `, ${user.name}` : ''}</h2>
+          <p className="muted">Главная заглушка (доступна только авторизованным)</p>
         </div>
+        <Button onClick={() => dispatch(logout())}>Logout</Button>
       </header>
       <div className="card">
         <p>Здесь аналитика и ссылки на разделы.</p>
@@ -101,7 +103,7 @@ const HomePage = () => {
             >
               <option value="">Все категории</option>
               {categories.map((c) => (
-                <option key={c._id} value={c._id}>
+                <option key={c.id} value={c.id}>
                   {c.name}
                 </option>
               ))}
